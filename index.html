@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game & Pizza Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background-color: #f8f4e9;
+            color: #2c1810;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23c9a87a' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            transition: all 0.4s ease;
+            font-size: clamp(14px, 2vw, 18px);
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(to right, #8B0000, #8B4513);
+            padding: clamp(15px, 3vw, 25px);
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-bottom: 4px solid #D4AF37;
+        }
+
+        /* Logo + Title Container */
+        .logo-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-align: left;
+        }
+
+        .logo {
+            width: 160px;
+            height: 160px;
+            border-radius: 50px;
+            object-fit: cover;
+        }
+
+        .title-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            margin: 0;
+            color: #F8F4E9;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+        }
+
+        header p {
+            color: #F8F4E9;
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            margin: 10px 0;
+            font-style: italic;
+        }
+
+        nav {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            gap: 12px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 15px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #F8F4E9;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            position: relative;
+            padding: 5px 0;
+            white-space: nowrap;
+            flex: 0 0 auto;
+        }
+
+        nav a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #D4AF37;
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #D4AF37;
+        }
+
+        nav a:hover:after {
+            width: 100%;
+        }
+
+        /* Hide scrollbar for cleaner look */
+        nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        nav {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Toggle Buttons */
+        .toggle-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin: 10px 20px;
+        }
+        
+        .toggle-btn {
+            background: #FFD700;
+            border: none;
+            padding: clamp(8px, 1.5vw, 10px) clamp(15px, 2vw, 20px);
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .toggle-btn:hover {
+            background: #FFA500;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            padding: clamp(8px, 1.5vw, 12px) clamp(14px, 2vw, 24px);
+            margin: 5px 10px;
+            background-color: #8B0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            transition: all 0.3s ease;
+            width: auto;
+            flex: 1 1 auto;
+            text-align: center;
+            max-width: 200px;
+        }
+        
+        .nav-tab:hover {
+            background-color: #a52a2a;
+            transform: translateY(-2px);
+        }
+        
+        .nav-tab.active {
+            background-color: #D4AF37;
+            color: #2c1810;
+        }
+        
+        /* Content Sections */
+        .content-section {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: clamp(15px, 3vw, 40px);
+            width: 95%;
+            box-sizing: border-box;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        /* Game Selector Styles */
+        #games-section {
+            text-align: center;
+        }
+        
+        .game-button {
+            padding: clamp(10px, 2vw, 12px) clamp(15px, 2vw, 24px);
+            margin: 10px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            background-color: #8B0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cormorant Garamond', serif;
+        }
+        
+        .game-button:hover {
+            background-color: #a52a2a;
+            transform: translateY(-2px);
+        }
+        
+        #gameContainer {
+            margin-top: 30px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        #gameFrame {
+            width: 100%;
+            height: clamp(250px, 50vh, 500px);
+            border: none;
+        }
+
+        /* Cards */
+        .card-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
+            width: 220px;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        /* Menu Sections */
+        .search-bar {
+            margin: 25px auto;
+            text-align: center;
+        }
+
+        .search-bar input {
+            padding: clamp(10px, 2vw, 12px) clamp(15px, 2vw, 20px);
+            width: min(90%, 380px);
+            border: 2px solid #8B4513;
+            border-radius: 30px;
+            outline: none;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            background: rgba(253, 246, 227, 0.8);
+            font-family: 'Cormorant Garamond', serif;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        section {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: clamp(15px, 3vw, 25px);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        section:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #8B0000, #8B4513, #D4AF37);
+        }
+
+        h2 {
+            border-bottom: 2px solid #D4AF37;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-family: 'Cinzel', serif;
+            color: #8B0000;
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            display: inline-block;
+            position: relative;
+        }
+
+        h2:after {
+            content: '◆';
+            position: absolute;
+            right: -30px;
+            color: #D4AF37;
+        }
+
+        h2:before {
+            content: '◆';
+            position: absolute;
+            left: -30px;
+            color: #D4AF37;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: clamp(10px, 2vw, 20px);
+            border-bottom: 1px dashed #c9a87a;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            position: relative;
+            flex-wrap: wrap;
+        }
+
+        .menu-item:hover {
+            background: linear-gradient(to right, rgba(253, 246, 227, 0.5), rgba(255, 240, 210, 0.5));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .menu-item span:first-child {
+            font-weight: 600;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: #8B4513;
+            flex: 1;
+        }
+
+        .menu-item span:last-child {
+            font-weight: 700;
+            color: #8B0000;
+            margin-right: 15px;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+        }
+
+        .mini-model {
+            width: clamp(50px, 15vw, 80px);
+            height: clamp(50px, 15vw, 80px);
+            margin-left: 10px;
+            background: transparent;
+            border: 2px solid #D4AF37;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .view-2d {
+            display: block;
+        }
+        
+        .view-3d {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            background: #8B0000;
+            color: white;
+            padding: 15px;
+            margin-top: 30px;
+        }
+
+        /* Dark Mode */
+        .dark-mode {
+            background-color: #1e1e1e;
+            color: #f8f8f8;
+            background-image: none;
+        }
+
+        .dark-mode header {
+            background: linear-gradient(to right, #222, #444);
+            border-bottom: 4px solid #FFD700;
+        }
+
+        .dark-mode nav a {
+            color: #f8f8f8;
+        }
+
+        .dark-mode nav a:hover {
+            color: #FFD700;
+        }
+
+        .dark-mode section {
+            background: rgba(34, 34, 34, 0.9);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.08);
+        }
+
+        .dark-mode h2 {
+            color: #FFD700;
+            border-bottom: 2px solid #FFD700;
+        }
+
+        .dark-mode .menu-item {
+            border-bottom: 1px dashed #aaa;
+        }
+
+        .dark-mode .menu-item span:first-child {
+            color: #FFD700;
+        }
+
+        .dark-mode .menu-item span:last-child {
+            color: #fff;
+        }
+
+        .dark-mode .search-bar input {
+            background: #333;
+            border: 2px solid #FFD700;
+            color: #fff;
+        }
+
+        .dark-mode section:before {
+            background: linear-gradient(to right, #444, #666, #FFD700);
+        }
+
+        .dark-mode .menu-item:hover {
+            background: linear-gradient(to right, rgba(50, 50, 50, 0.5), rgba(70, 70, 70, 0.5));
+        }
+
+        .dark-mode .card {
+            background: #333;
+            color: white;
+        }
+
+        .dark-mode .toggle-btn {
+            background: yellow;
+            color: black;
+        }
+
+        .dark-mode footer {
+            background: #111;
+        }
+
+        /* --- Media Queries for Extra Control --- */
+        @media (max-width: 600px) {
+            /* Keep navigation horizontal with scrolling */
+            nav {
+                justify-content: flex-start;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            /* Adjust toggle button position */
+            .toggle-container {
+                flex-direction: column;
+                align-items: flex-end;
+            }
+            
+            /* Keep tabs horizontal with scrolling */
+            .nav-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                justify-content: flex-start;
+                padding: 0 10px 10px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .nav-tab {
+                flex: 0 0 auto;
+                width: auto;
+                margin: 5px;
+            }
+            
+            /* Hide scrollbars for cleaner look */
+            .nav-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-tabs {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            
+            /* Menu items adjustments */
+            .menu-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .mini-model {
+                margin: 10px 0 0 0;
+                align-self: center;
+            }
+        }
+
+        /* Tablets and small laptops (min-width: 601px and max-width: 1024px) */
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .search-bar input {
+                width: 60%;
+            }
+        }
+
+        /* Large laptops and desktops (min-width: 1025px) */
+        @media (min-width: 1025px) {
+            .content-section {
+                padding: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo-title">
+            <img src="logo.png" alt="Logo" class="logo">
+            <div class="title-text">
+                <h1>R tech</h1>
+                <p>Turn Every Menu into a Customer Magnet</p>
+            </div>
+        </div>
+        <nav>
+            <a href="#games">Games</a>
+            <a href="#pizza">Pizza</a>
+            <a href="#Food">Food</a>
+            <a href="#icecream">Ice Cream</a>
+            <a href="#smoothie">Smoothie</a>
+        </nav>
+    </header>
+
+    <!-- Toggle Buttons Container -->
+    <div class="toggle-container">
+        <button class="toggle-btn" onclick="toggleMode()">🌙 Dark</button>
+        <button id="toggleViewBtn" class="toggle-btn">Switch to 3D</button>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="nav-tab" onclick="showSection('games-section', this)">Games</button>
+        <button class="nav-tab active" onclick="showSection('menu-section', this)">Food Menu</button>
+    </div>
+
+    <div id="games-section" class="content-section">
+        <h2>🎮 Game Selector</h2>
+        <button class="game-button" onclick="loadGame('tic-tac-toe.html')">Tic Tac Toe</button>
+        <button class="game-button" onclick="loadGame('memory match.html')">Memory Match</button>
+        <button class="game-button" onclick="loadGame('Ludo_Game.html')">Reaction Duel</button>
+        <button class="game-button" onclick="loadGame('couple-quiz.html')">Couple Quiz</button>
+        
+        <div id="gameContainer">
+            <iframe id="gameFrame"></iframe>
+        </div>
+    </div>
+
+    <div id="menu-section" class="content-section active">
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Search menu...">
+        </div>
+
+        <section id="pizza">
+            <h2>Pizza</h2>
+
+            <a href="Greek_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">Greek_Pizza</span>
+                <span>299₹</span>
+                <!-- 3D model (hidden by default) -->
+                <model-viewer class="mini-model view-3d" 
+                    src="Greek_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <!-- 2D image -->
+                <img class="mini-model view-2d" src="Greek_Pizza.jpg" alt="Greek Pizza">
+            </a>  
+
+          <a href="California_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">California_Pizza</span>
+                <span>299₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="California_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="California_Pizza.jpg" alt="California Pizza">
+            </a>  
+
+              <a href="Detroit_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">Detroit_Pizza</span>
+                <span>399₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Detroit_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Detroit_Pizza.jpg" alt="Detroit Pizza">
+            </a>  
+
+            <a href="Pan_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">Pan_Pizza</span>
+                <span>299₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Pan_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Pan_Pizza.jpg" alt="Pan Pizza">
+            </a>  
+
+           <a href="Cheese_Cust_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">cheese crust</span>
+                <span>399₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Cheese_Crust_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Cheese_Crust_Pizza.jpg" alt="Cheese Crust Pizza">
+            </a> 
+
+          <a href="Peppy_Poneer_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">Peppy_Poneer_Pizza</span>
+                <span>299₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Peppy_Poneer_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Peppy_Poneer_Pizza.jpg" alt="Peppy Poneer Pizza">
+            </a> 
+
+            <a href="Deluxe_Veggie_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">Deluxe_Veggie_Pizza</span>
+                <span>399₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Deluxe_Veggie_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Deluxe_Veggie_Pizza.jpg" alt="Deluxe Veggie Pizza">
+            </a> 
+
+            <a href="Sicilian_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">Sicilian_Pizza</span>
+                <span>299₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Sicilian_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Sicilian_Pizza.jpg" alt="Sicilian Pizza">
+            </a> 
+
+              <a href="Italian_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">Italian_Pizza</span>
+                <span>299₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Italian_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Italian_Pizza.jpg" alt="Italian Pizza">
+            </a> 
+
+              <a href="Pecorino_Cheese_Pizza.html" class="menu-item">
+                <span style="font-weight: bold;">Pecorino_Cheese_Pizza</span>
+                <span>399₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Pecorino_Cheese_Pizza.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Pecorino_Cheese_Pizza.jpg" alt="Pecorino Cheese Pizza">
+            </a> 
+        </section>
+
+        <section id="Food">
+            <h2>Food</h2>
+
+            <a href="Cheese_pasta.html" class="menu-item">
+                <span style="font-weight: bold;">Cheese_pasta</span>
+                <span>299₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Cheese_pasta.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Cheese_pasta.jpg" alt="Cheese Pasta">
+            </a>  
+
+            <a href="pav_bhaji.html" class="menu-item">
+                <span style="font-weight: bold;">pav_bhaji</span>
+                <span>199₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="pav_bhaji.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="pav_bhaji.jpg" alt="Pav Bhaji">
+            </a>
+
+          <a href="Fruit_Burger.html" class="menu-item">
+                <span style="font-weight: bold;">Fruit_Burger</span>
+                <span>140₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Fruit_Burger.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Fruit_Burger.jpg" alt="Fruit Burger">
+            </a>
+
+          <a href="maggi.html" class="menu-item">
+                <span style="font-weight: bold;">maggi</span>
+                <span>140₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="maggi.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="maggi.jpg" alt="Maggi">
+            </a>
+
+              <a href="Cheese_Burger.html" class="menu-item">
+                <span style="font-weight: bold;">cheese burger</span>
+                <span>199₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Cheese_Burger.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Cheese_Burger.jpg" alt="Cheese Burger">
+            </a>
+
+            <a href="pasta.html" class="menu-item">
+                <span style="font-weight: bold;">pasta</span>
+                <span>199₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="pasta.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="pasta.jpg" alt="Pasta">
+            </a>
+
+        </section>
+
+        <section id="icecream">
+            <h2>Ice Cream</h2>
+
+                <a href="Cookie_Dough.html" class="menu-item">
+                <span style="font-weight: bold;">Cookie Dough</span>
+                <span>199₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Cookie_Dough.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Cookie_Dough.jpg" alt="Cookie Dough">
+            </a>
+
+            <a href="Vanilla_Bean.html" class="menu-item">
+                <span style="font-weight: bold;">Vanilla_Bean</span>
+                <span>150₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Vanilla_Bean.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Vanilla_Bean.jpg" alt="Vanilla Bean">
+            </a>
+
+          <a href="Cotton_Candy.html" class="menu-item">
+                <span style="font-weight: bold;">Cotton_Candy</span>
+                <span>150₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Cotton_Candy.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Cotton_Candy.jpg" alt="Cotton Candy">
+            </a>
+            
+        <a href="Peanut_Butter.html" class="menu-item">
+                <span style="font-weight: bold;">Peanut_Butter</span>
+                <span>150₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Peanut_Butter.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Peanut_Butter.jpg" alt="Peanut Butter">
+            </a>
+
+        <a href="Salted_Caramel.html" class="menu-item">
+                <span style="font-weight: bold;">Salted_Caramel</span>
+                <span>150₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Salted_Caramel.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Salted_Caramel.jpg" alt="Salted Caramel">
+            </a>
+
+        <a href="Coconut_Crush.html" class="menu-item">
+                <span style="font-weight: bold;">Coconut_Crush</span>
+                <span>150₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Coconut_Crush.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Coconut_Crush.jpg" alt="Coconut Crush">
+            </a>
+
+        </section>
+
+        <section id="smoothie">
+            <h2>Smoothie</h2>
+
+          <a href="Raspberry _Smoothie.html" class="menu-item">
+                <span style="font-weight: bold;">respberry</span>
+                <span>160₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Raspberry _Smoothie.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Raspberry_Smoothie.jpg" alt="Raspberry Smoothie">
+            </a>
+
+            <a href="banana.html" class="menu-item">
+                <span style="font-weight: bold;">Banana</span>
+                <span>299₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="banana_smoothie.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="banana_smoothie.jpg" alt="Banana Smoothie">
+            </a>
+
+          <a href="Pineapple_Smoothie.html" class="menu-item">
+                <span style="font-weight: bold;">pineapple</span>
+                <span>150₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Pineapple_Smoothie.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Pineapple_Smoothie.jpg" alt="Pineapple Smoothie">
+            </a>
+
+
+          <a href="Tropical_Fruit_Smoothie.html" class="menu-item">
+                <span style="font-weight: bold;">Tropical Fruit</span>
+                <span>150₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Tropical_Fruit_Smoothie.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Tropical_Fruit_Smoothie.jpg" alt="Tropical Fruit Smoothie">
+            </a>
+
+            <a href="Butter_Bash_Smoothie.html" class="menu-item">
+                <span style="font-weight: bold;">Butter_Bash</span>
+                <span>299₹</span>
+                <model-viewer class="mini-model view-3d" 
+                    src="Butter_Bash_Smoothie.glb" 
+                    auto-rotate 
+                    auto-rotate-speed="0.5"
+                    camera-controls 
+                    exposure="1.2" 
+                    shadow-intensity="1">
+                </model-viewer>
+                <img class="mini-model view-2d" src="Butter_Bash_Smoothie.jpg" alt="Butter Bash Smoothie">
+            </a> 
+
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Game & Pizza Hub | All Rights Reserved</p>
+    </footer>
+
+    <script>
+        // Section navigation
+        function showSection(sectionId, clickedButton) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Update active tab
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Make the clicked button active
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+        }
+        
+        // Game loading function
+        function loadGame(game) {
+            document.getElementById('gameFrame').src = game;
+        }
+        
+        // Toggle dark/light mode
+        function toggleMode() {
+            document.body.classList.toggle("dark-mode");
+            let btn = document.querySelector(".toggle-btn");
+            if (document.body.classList.contains("dark-mode")) {
+                btn.textContent = "☀️ Light";
+            } else {
+                btn.textContent = "🌙 Dark";
+            }
+        }
+
+        // Smooth scrolling
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // If we're not on the menu section, switch to it first
+                const menuSection = document.getElementById('menu-section');
+                if (!menuSection.classList.contains('active')) {
+                    showSection('menu-section', document.querySelector('.nav-tab[onclick="showSection(\'menu-section\', this)"]'));
+                    // We need a short delay to ensure the section is visible before scrolling
+                    setTimeout(() => {
+                        document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                } else {
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Search filter
+        document.getElementById('search').addEventListener('input', function() {
+            let filter = this.value.toLowerCase();
+            document.querySelectorAll('.menu-item').forEach(item => {
+                let text = item.textContent.toLowerCase();
+                item.style.display = text.includes(filter) ? 'flex' : 'none';
+            });
+        });
+
+        // 2D/3D Toggle Functionality
+        const toggleBtn = document.getElementById("toggleViewBtn");
+        let is3D = false; // Default = 2D
+
+        toggleBtn.addEventListener("click", () => {
+            is3D = !is3D;
+
+            // Update button text
+            toggleBtn.textContent = is3D ? "Switch to 2D" : "Switch to 3D";
+
+            // Toggle visibility
+            document.querySelectorAll(".view-3d").forEach(el => {
+                el.style.display = is3D ? "block" : "none";
+            });
+            document.querySelectorAll(".view-2d").forEach(el => {
+                el.style.display = is3D ? "none" : "block";
+            });
+        });
+
+        // Initial check to ensure a section is active on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuTab = document.querySelector('.nav-tab[onclick="showSection(\'menu-section\', this)"]');
+            const menuSection = document.getElementById('menu-section');
+            if (menuTab && !menuSection.classList.contains('active')) {
+                showSection('menu-section', menuTab);
+            }
+        });
+    </script>
+</body>
+</html>

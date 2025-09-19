@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Party Quest — 2–6 Player Party Board</title>
+<style>
+  :root{
+    --bgA:#ffecd2; --bgB:#fcb69f;
+    --card:#fffef8; --muted:#666;
+    --p1:#ff6b6b; --p2:#4da6ff; --p3:#67e2a5; --p4:#ffd166; --p5:#b39eff; --p6:#ff9ab3;
+    --tile: 64px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    background: linear-gradient(135deg,var(--bgA),var(--bgB));
+    display:flex; align-items:center; justify-content:center; padding:18px;
+  }
+
+  .app {
+    width:100%; max-width:1200px; background:linear-gradient(180deg,#ffffffee,#fffaf6);
+    border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,0.16); padding:18px; display:grid;
+    grid-template-columns: 1fr 340px; gap:18px;
+  }
+
+  /* Board area */
+  .board-wrap { padding:8px; }
+  h1 { margin:6px 0 8px; font-size:22px; display:flex; gap:12px; align-items:center; }
+  .board {
+    width: calc(var(--tile) * 8 + 7*10px); /* 8 columns default */
+    display:grid; gap:10px;
+    grid-template-columns: repeat(8, var(--tile));
+    grid-auto-rows: var(--tile);
+    padding:12px; background:linear-gradient(180deg,#fff,#fffdf8); border-radius:12px;
+    margin:6px 0;
+    justify-content:center;
+  }
+
+  .tile {
+    border-radius:12px; background:linear-gradient(180deg,#ffffff,#f6f6f6);
+    border:1px solid rgba(0,0,0,0.06); display:flex; flex-direction:column; justify-content:space-between;
+    padding:6px; position:relative; overflow:visible;
+  }
+  .tile .num { font-size:12px; color:var(--muted); text-align:right; }
+  .tile .emoji { font-size:20px; margin-top:6px; text-align:left; opacity:0.9; }
+  .tile .eventMark { position:absolute; left:8px; top:8px; font-size:16px; }
+
+  .tokens { position:absolute; right:8px; bottom:8px; display:flex; gap:6px; align-items:center; }
+  .tok {
+    width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;
+    box-shadow:0 6px 16px rgba(0,0,0,0.12);
+    transform:translateY(0);
+  }
+
+  /* Side panel */
+  .panel { padding:12px; background:linear-gradient(180deg,#fff,#fffbf6); border-radius:12px; display:flex; flex-direction:column; gap:12px; }
+  .controls { display:flex; gap:8px; align-items:center; justify-content:center; }
+  button { cursor:pointer; border:none; padding:10px 12px; border-radius:10px; font-weight:700; }
+  #startBtn { background:linear-gradient(90deg,#ff9a9e,#ff6b6b); color:white; }
+  .bigBtn { background:linear-gradient(90deg,#7bd389,#4da6ff); color:#052; }
+
+  .playerRow { display:flex; gap:10px; align-items:center; padding:8px; border-radius:10px; background:linear-gradient(90deg, #fff, rgba(0,0,0,0.02)); }
+  .badge { width:42px;height:42px;border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:22px; color:#111; font-weight:900; }
+  .score { margin-left:auto; font-weight:900; font-size:18px; }
+
+  #turnLabel { font-size:16px; font-weight:900; text-align:center; padding:8px; border-radius:10px; background:#fff; }
+
+  .log { background:#fffaf3; padding:8px; border-radius:10px; min-height:120px; max-height:300px; overflow:auto; font-size:13px; }
+
+  .settings { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+
+  .modal {
+    position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:99;
+  }
+  .modal .box { width:90%; max-width:520px; background:#fff; padding:18px; border-radius:12px; box-shadow:0 14px 40px rgba(0,0,0,0.2); }
+
+  .dice { font-size:36px; width:80px; height:80px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:linear-gradient(90deg,#fff,#f3f3f3); box-shadow:0 8px 20px rgba(0,0,0,0.08); margin:auto; }
+
+  /* confetti hearts */
+  .confetti { position:absolute; pointer-events:none; inset:0; z-index:30; }
+
+  @media (max-width:1000px){
+    .app{grid-template-columns:1fr;}
+    .board{transform:scale(0.92)}
+  }
+</style>
+</head>
+<body>
+<div class="app" role="application" aria-label="Party Quest game">
+  <div class="board-wrap">
+    <h1>🎉 Party Quest — Adventure Board Game</h1>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">
+      <div style="font-size:14px;color:#444">Players:</div>
+      <select id="playerCount"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select>
+
+      <div style="font-size:14px;color:#444;margin-left:10px">Tiles:</div>
+      <input id="tileCount" type="number" value="40" min="20" max="80" style="width:80px;padding:6px;border-radius:8px;border:1px solid #ddd" />
+
+      <div style="font-size:14px;color:#444;margin-left:10px">Duration (min):</div>
+      <input id="duration" type="number" value="20" min="5" max="60" style="width:80px;padding:6px;border-radius:8px;border:1px solid #ddd" />
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:8px">
+      <button id="startBtn">Start Game</button>
+      <button id="restartBtn" style="display:none">Restart</button>
+    </div>
+
+    <div style="margin-top:10px;color:#333;font-size:13px">Tip: roll the dice, move your emoji token, and survive random tiles — mini-games keep everyone entertained!</div>
+  </div>
+
+  <div class="panel">
+    <div id="turnLabel">Not started</div>
+
+    <div id="playersList"></div>
+
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button id="rollBtn" class="bigBtn" style="display:none">🎲 Roll</button>
+      <div class="dice" id="diceShow" style="display:none">-</div>
+    </div>
+
+    <div style="font-weight:800">Recent Log</div>
+    <div class="log" id="log"></div>
+
+    <div style="display:flex;gap:8px;align-items:center;justify-content:center">
+      <button id="toggleSound">🔊 Sound</button>
+      <button id="toggleConfetti">✨ Confetti</button>
+    </div>
+
+    <div style="margin-top:6px;font-size:12px;color:var(--muted)">First to reach the last tile OR highest score when time ends wins.</div>
+  </div>
+</div>
+
+<!-- Modal container -->
+<div id="modalRoot" style="display:none"></div>
+<div id="confettiRoot" class="confetti" aria-hidden="true"></div>
+
+<script>
+/* Party Quest — Implementation
+   - Configurable players & tiles
+   - Each player has 1 visible token but scoring makes games longer. (Tokens can be extended later.)
+   - Random event tiles with many emoji types.
+   - Mini-games: Rock-Paper-Scissors (RPS) and Reaction Tap.
+*/
+
+// ----- configuration & assets -----
+const EMOJI_POOL = ['🐶','🐱','🐢','🦊','🐼','🦄']; // up to 6
+const PLAYER_COLORS = ['var(--p1)','var(--p2)','var(--p3)','var(--p4)','var(--p5)','var(--p6)'];
+const EVENT_ICONS = {
+  BONUS: '💎', TRAP: '🕳️', SWAP: '🔀', TELE: '🌀',
+  MINIG_RPS: '✂️📜🪨', MINIG_REACT:'⚡', TRUTH:'❓', TREASURE:'🎁', SKIP:'⏭️'
+};
+const EVENT_LIST = ['BONUS','TRAP','SWAP','TELE','MINIG_RPS','MINIG_REACT','TRUTH','TREASURE','SKIP'];
+
+// game state
+let players = []; // {id,emoji,color,pos,score,skip,nextDouble}
+let tileCount = 40;
+let currentIdx = 0;
+let running = false;
+let timerHandle = null;
+let endTimestamp = null;
+let confettiOn = true;
+let soundOn = false;
+let eventMap = {}; // tile -> event
+const logEl = document.getElementById('log');
+const boardEl = document.getElementById('board');
+const modalRoot = document.getElementById('modalRoot');
+const confettiRoot = document.getElementById('confettiRoot');
+
+// utility
+const rand = (min,max)=> Math.floor(Math.random()*(max-min+1))+min;
+const sample = a => a[rand(0,a.length-1)];
+function lg(s){ const p=document.createElement('div'); p.textContent = `${new Date().toLocaleTimeString()} • ${s}`; logEl.prepend(p); }
+
+// ----- UI helpers -----
+function createBoardGrid(n){
+  boardEl.style.gridTemplateColumns = `repeat(${Math.min(10, Math.ceil(n/5))}, var(--tile))`;
+  boardEl.innerHTML = '';
+  for(let i=1;i<=n;i++){
+    const t = document.createElement('div'); t.className='tile'; t.id='tile-'+i;
+    t.innerHTML = `<div class="num">${i}</div><div class="emoji" id="emoji-${i}"></div><div class="eventMark" id="mark-${i}"></div><div class="tokens" id="tokens-${i}"></div>`;
+    boardEl.appendChild(t);
+  }
+}
+
+// randomize event tiles (except start tile 1)
+function assignEvents(n){
+  eventMap = {};
+  const slots = Array.from({length:n-1},(_,i)=>i+2);
+  shuffle(slots);
+  const evCount = Math.max(8, Math.floor(n*0.22)); // ~22% tiles are events
+  for(let i=0;i<evCount;i++){
+    const t = slots[i];
+    // weight events: bonus & trap a bit more frequent
+    let pool=[];
+    EVENT_LIST.forEach(ev=>{
+      const w = (ev==='BONUS'||ev==='TRAP') ? 3 : 1;
+      for(let k=0;k<w;k++) pool.push(ev);
+    });
+    const picked = sample(pool);
+    eventMap[t] = picked;
+    const mark = document.getElementById('mark-'+t);
+    if(mark) mark.textContent = EVENT_ICONS[picked] || '❔';
+  }
+}
+
+// shuffle helper
+function shuffle(array){ for(let i=array.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [array[i],array[j]]=[array[j],array[i]]; } }
+
+// render players list & tokens
+function renderPlayers(){
+  const list = document.getElementById('playersList'); list.innerHTML = '';
+  players.forEach((p, idx)=>{
+    const row = document.createElement('div'); row.className='playerRow';
+    const badge = document.createElement('div'); badge.className='badge'; badge.style.background = p.color; badge.textContent = p.emoji;
+    const name = document.createElement('div'); name.innerHTML = `<div style="font-weight:800">Player ${p.id}</div><div style="font-size:12px;color:var(--muted)">Points ${p.score} • Tile ${p.pos}</div>`;
+    const score = document.createElement('div'); score.className='score'; score.textContent = p.score;
+    row.appendChild(badge); row.appendChild(name); row.appendChild(score);
+    list.appendChild(row);
+  });
+  // tokens on tiles
+  for(let i=1;i<=tileCount;i++){ const tk=document.getElementById('tokens-'+i); if(tk) tk.innerHTML=''; }
+  players.forEach(p=>{
+    if(p.pos>=1 && p.pos<=tileCount){
+      const cont = document.getElementById('tokens-'+p.pos);
+      if(cont){
+        const el = document.createElement('div'); el.className='tok'; el.style.background=p.color; el.textContent=p.emoji;
+        cont.appendChild(el);
+      }
+    }
+  });
+  updateTurnLabel();
+}
+
+// update turn label and dice visibility
+function updateTurnLabel(){ 
+  const turnEl = document.getElementById('turnLabel');
+  if(!running){ turnEl.textContent = 'Not started'; document.getElementById('rollBtn').style.display='none'; document.getElementById('diceShow').style.display='none'; return; }
+  const p = players[currentIdx];
+  turnEl.textContent = `Player ${p.id}'s Turn ${p.emoji} • Points ${p.score}`;
+  document.getElementById('rollBtn').style.display = 'inline-block';
+  document.getElementById('diceShow').style.display = 'inline-block';
+}
+
+// ----- game lifecycle -----
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  if(running) return;
+  startGame();
+});
+document.getElementById('restartBtn').addEventListener('click', ()=> location.reload());
+document.getElementById('rollBtn').addEventListener('click', ()=> playerRoll());
+document.getElementById('toggleConfetti').addEventListener('click', ()=>{
+  confettiOn = !confettiOn; document.getElementById('toggleConfetti').textContent = confettiOn ? '✨ Confetti' : '🚫 Confetti';
+});
+document.getElementById('toggleSound').addEventListener('click', ()=>{
+  soundOn = !soundOn; document.getElementById('toggleSound').textContent = soundOn ? '🔊 Sound' : '🔈 Mute';
+});
+
+// start game: build board, players, events, start timer
+function startGame(){
+  const pcount = parseInt(document.getElementById('playerCount').value,10);
+  tileCount = Math.max(20, Math.min(80, parseInt(document.getElementById('tileCount').value,10)||40));
+  const durationMin = Math.max(1, parseInt(document.getElementById('duration').value,10)||20);
+
+  createBoardGrid(tileCount);
+  // create players
+  players = [];
+  for(let i=0;i<pcount;i++){
+    players.push({ id:i+1, emoji:EMOJI_POOL[i], color:PLAYER_COLORS[i], pos:1, score:0, skip:false });
+  }
+  assignEvents(tileCount);
+  currentIdx = 0;
+  running = true;
+  renderPlayers();
+  lg('Game started: ' + players.length + ' players • ' + tileCount + ' tiles • ' + durationMin + ' min');
+  // timer
+  const now = Date.now(); endTimestamp = now + durationMin*60000;
+  timerHandle = setTimeout(()=> finishByTime(), durationMin*60000);
+  document.getElementById('startBtn').style.display='none';
+  document.getElementById('restartBtn').style.display='inline-block';
+  updateTurnLabel();
+}
+
+// player rolls
+function playerRoll(){
+  if(!running) return;
+  const p = players[currentIdx];
+  if(p.skip){ lg(`Player ${p.id} ${p.emoji} is skipping this turn.`); p.skip=false; nextTurn(); return; }
+  // dice animation small
+  let steps=14; const ds=document.getElementById('diceShow'); ds.textContent='-';
+  const spin = setInterval(()=>{ ds.textContent = rand(1,6); }, 60);
+  setTimeout(()=>{
+    clearInterval(spin);
+    const rolled = rand(1,6);
+    ds.textContent = rolled;
+    lg(`Player ${p.id} ${p.emoji} rolled ${rolled}`);
+    // move
+    movePlayerBy(p, rolled);
+  }, 900);
+}
+
+// move and landing resolution
+function movePlayerBy(player, n){
+  // points for rolling (adds excitement)
+  player.score += n;
+  // move step-by-step with small delay
+  const target = Math.min(tileCount, player.pos + n);
+  const steps = target - player.pos;
+  let i=0;
+  const stepFn = ()=>{
+    if(i<steps){ player.pos++; i++; renderPlayers(); setTimeout(stepFn, 150); }
+    else{ 
+      // landed - resolve event
+      const tile = player.pos;
+      lg(`Player ${player.id} landed on tile ${tile}`);
+      resolveTileEvent(player, tile);
+    }
+  };
+  stepFn();
+}
+
+// tile event resolution
+function resolveTileEvent(player, tile){
+  const ev = eventMap[tile];
+  if(!ev){ lg('Nothing here.'); finishTurn(); return; }
+
+  lg(`Event: ${ev} (${EVENT_ICONS[ev]||''})`);
+  switch(ev){
+    case 'BONUS':
+      const bonus = rand(6,14);
+      player.score += bonus; lg(`🎉 Bonus! +${bonus} points → ${player.score}`);
+      popConfettiSmall();
+      finishTurn();
+      break;
+    case 'TRAP':
+      const penalty = rand(4,10);
+      player.score = Math.max(0, player.score - penalty);
+      lg(`😵 Trap! -${penalty} points → ${player.score}`);
+      finishTurn();
+      break;
+    case 'SWAP':
+      // swap pos with random other player
+      const others = players.filter(p=>p.id!==player.id);
+      const target = sample(others);
+      const tmp = target.pos; target.pos = player.pos; player.pos = tmp;
+      lg(`🔀 Swapped tiles with Player ${target.id} ${target.emoji}!`);
+      renderPlayers();
+      finishTurn();
+      break;
+    case 'TELE':
+      // teleport forward (likely) or backward
+      const dist = rand(3,10);
+      const forward = Math.random() < 0.7;
+      player.pos = Math.max(1, Math.min(tileCount, player.pos + (forward?dist:-dist)));
+      lg(`🌀 Teleported ${forward?('forward '+dist):('back '+dist)} → tile ${player.pos}`);
+      renderPlayers();
+      finishTurn();
+      break;
+    case 'MINIG_RPS':
+      // rock paper scissors vs random player
+      const opps = players.filter(p=>p.id!==player.id);
+      const opp = sample(opps);
+      showRPS(player, opp);
+      break;
+    case 'MINIG_REACT':
+      showReactionGame(player);
+      break;
+    case 'TRUTH':
+      showTruthQuestion(player);
+      break;
+    case 'TREASURE':
+      const find = rand(8,20);
+      player.score += find; lg(`🎁 Treasure! +${find} points → ${player.score}`);
+      popConfettiSmall();
+      finishTurn();
+      break;
+    case 'SKIP':
+      const victim = sample(players.filter(p=>p.id!==player.id));
+      victim.skip = true;
+      lg(`⏭️ Player ${victim.id} will skip next turn!`);
+      finishTurn();
+      break;
+    default:
+      finishTurn();
+  }
+}
+
+// finish turn: check win or next turn
+function finishTurn(){
+  // check if someone reached final tile
+  const p = players[currentIdx];
+  if(p.pos >= tileCount){
+    lg(`🏁 Player ${p.id} reached final tile!`);
+    // immediate win if final tile reached with a big score threshold optionally
+    // we'll declare winner when someone reaches tile or when time ends; for excitement, if someone reaches last tile and has top score, finish
+    checkVictoryPossible();
+  }
+  // small delay then next
+  setTimeout(()=> nextTurn(), 600);
+}
+
+function checkVictoryPossible(){
+  // if player at last tile and is highest score, finish immediately
+  const lead = players.reduce((a,b)=> a.score>=b.score ? a : b);
+  const p = players[currentIdx];
+  if(p.pos>=tileCount && p.score===lead.score){
+    finishGame(p);
+    return true;
+  }
+  return false;
+}
+
+function nextTurn(){
+  // advance to next non-eliminated player
+  currentIdx = (currentIdx+1) % players.length;
+  let attempts=0;
+  while(players[currentIdx].skip){ // if player should be skipped, consume skip and pass
+    players[currentIdx].skip=false;
+    lg(`Player ${players[currentIdx].id} was skipped (auto)`);
+    currentIdx=(currentIdx+1)%players.length;
+    if(++attempts>10) break;
+  }
+  renderPlayers();
+  // check time left
+  if(Date.now() >= endTimestamp){
+    finishByTime();
+  }
+}
+
+// finish when time up
+function finishByTime(){
+  if(!running) return;
+  running=false;
+  clearTimeout(timerHandle);
+  // winner = highest score
+  const winner = players.slice().sort((a,b)=> b.score - a.score)[0];
+  finishGame(winner, true);
+}
+
+// finish game procedure
+function finishGame(winner, timed=false){
+  running=false;
+  lg('🏆 Game Over! Winner: Player '+winner.id+' '+winner.emoji+' • Points: '+winner.score);
+  showModal(`<div style="font-size:20px">🏆 Player ${winner.id} ${winner.emoji} Wins! 🎉</div><div style="margin-top:8px">Points: ${winner.score}</div>`, [{
+    txt:'OK', cls:'bigBtn', cb:()=>{ closeModal(); }
+  }]);
+  if(confettiOn) popConfettiBig();
+}
+
+// ----- mini-games & helpers -----
+
+// RPS interaction: show modal to choose rock/paper/scissor then compare with opponent random choice.
+function showRPS(player, opponent){
+  showModal(`<div style="font-size:18px">🪨✂️📄 Rock-Paper-Scissors</div>
+    <div style="margin-top:8px">You: ${player.emoji} vs Random Opponent: Player ${opponent.id} ${opponent.emoji}</div>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+      <button id="rps_rock">🪨</button><button id="rps_paper">📄</button><button id="rps_scissors">✂️</button>
+    </div>`, [], false);
+
+  document.getElementById('rps_rock').addEventListener('click', ()=> rpsPick(player, opponent, 'rock'));
+  document.getElementById('rps_paper').addEventListener('click', ()=> rpsPick(player, opponent, 'paper'));
+  document.getElementById('rps_scissors').addEventListener('click', ()=> rpsPick(player, opponent, 'scissors'));
+}
+
+function rpsPick(player, opponent, pick){
+  const choices = ['rock','paper','scissors'];
+  const oppPick = sample(choices);
+  let outcome = 'draw';
+  if(pick===oppPick) outcome='draw';
+  else if((pick==='rock'&&oppPick==='scissors')||(pick==='paper'&&oppPick==='rock')||(pick==='scissors'&&oppPick==='paper')) outcome='win';
+  else outcome='lose';
+  let msg = `You chose ${pick}. Opponent chose ${oppPick}.`;
+  if(outcome==='win'){ player.score += 12; msg += ' You win! +12 points.'; lg(`RPS: Player ${player.id} won vs Player ${opponent.id}`); popConfettiSmall(); }
+  else if(outcome==='lose'){ player.score = Math.max(0, player.score-6); msg += ' You lose. -6 points.'; lg(`RPS: Player ${player.id} lost vs Player ${opponent.id}`); }
+  else { msg += ' Draw. No change.'; }
+  // update UI & close modal
+  renderPlayers();
+  closeModal();
+  showModal(`<div style="font-size:16px">${msg}</div>`, [{txt:'Continue', cb:closeModal}]);
+}
+
+// Reaction mini-game: show GO after random delay; faster taps get points
+function showReactionGame(player){
+  showModal(`<div style="font-size:18px">⚡ Reaction Tap</div>
+    <div style="margin-top:8px">Wait... then tap the button as fast as you can!</div>
+    <div style="margin-top:12px;display:flex;justify-content:center"><button id="reactBtn" style="padding:12px 18px;border-radius:8px">Wait...</button></div>`, [], false);
+
+  const btn = document.getElementById('reactBtn'); btn.disabled=true;
+  const delay = rand(800,2200);
+  setTimeout(()=>{
+    btn.disabled = false; btn.textContent='TAP!';
+    const start = performance.now();
+    const handler = ()=>{
+      const rt = Math.round(performance.now()-start);
+      let pts = 0;
+      if(rt < 200) pts = 18;
+      else if(rt < 350) pts = 12;
+      else if(rt < 600) pts = 6;
+      else pts = 2;
+      player.score += pts;
+      lg(`Reaction: Player ${player.id} tapped in ${rt}ms → +${pts} pts`);
+      renderPlayers();
+      closeModal();
+      showModal(`<div style="font-size:16px">You tapped in ${rt} ms and earned ${pts} points!</div>`, [{txt:'Nice', cb:closeModal}]);
+      btn.removeEventListener('click', handler);
+    };
+    btn.addEventListener('click', handler);
+  }, delay);
+}
+
+// small truth question: friendly question from pool
+const TRUTHS = [
+  "What's a small thing that always makes you smile?",
+  "Name a silly habit you have.",
+  "Tell a tiny secret you haven't said to many people.",
+  "Who was your childhood hero?",
+  "What's your favorite happy memory?"
+];
+function showTruthQuestion(player){
+  const q = sample(TRUTHS);
+  showModal(`<div style="font-size:18px">❓ Truth</div><div style="margin-top:10px">${q}</div>`, [{txt:'Done', cb:closeModal}]);
+  lg(`Truth for Player ${player.id}: ${q}`);
+  // no score change — optional reward
+  // small reward
+  player.score += 4;
+  renderPlayers();
+}
+
+// ----- modal helpers -----
+function showModal(htmlContent, buttons = [{txt:'OK', cb:closeModal}], hideX=true){
+  modalRoot.innerHTML = '';
+  const modal = document.createElement('div'); modal.className='modal';
+  const box = document.createElement('div'); box.className='box'; box.innerHTML = htmlContent;
+  const foot = document.createElement('div'); foot.style.marginTop='12px'; foot.style.display='flex'; foot.style.gap='8px'; foot.style.justifyContent='center';
+  buttons.forEach(btn=>{
+    const b = document.createElement('button'); b.textContent = btn.txt; b.className='bigBtn'; b.style.padding='10px 12px';
+    b.addEventListener('click', ()=>{ if(btn.cb) btn.cb(); });
+    foot.appendChild(b);
+  });
+  box.appendChild(foot);
+  modal.appendChild(box);
+  modalRoot.appendChild(modal);
+  modalRoot.style.display='block';
+}
+function closeModal(){ modalRoot.innerHTML=''; modalRoot.style.display='none'; }
+
+// ----- confetti (cute) -----
+function popConfettiSmall(){
+  if(!confettiOn) return;
+  const colors = ["#ff6bcb","#ffd166","#7bd389","#7bd3ff"];
+  for(let i=0;i<10;i++){
+    const n = document.createElement('div'); n.style.position='absolute'; n.style.left = Math.random()*90+'%'; n.style.top = Math.random()*60+'%';
+    n.style.fontSize = (8+Math.random()*18)+'px'; n.textContent = sample(['💖','🌟','✨','🌸','💫']);
+    confettiRoot.appendChild(n);
+    const dur = 900 + Math.random()*800;
+    n.animate([{transform:'translateY(0) rotate(0deg)', opacity:1},{transform:`translateY(-80px) rotate(${Math.random()*360}deg)`, opacity:0}], {duration:dur, easing:'cubic-bezier(.2,.8,.2,1)'});
+    setTimeout(()=>n.remove(), dur+50);
+  }
+}
+function popConfettiBig(){
+  if(!confettiOn) return;
+  for(let i=0;i<50;i++) popConfettiSmall();
+}
+
+// ----- finishing helpers -----
+function finishGame(winner){
+  running=false;
+  showModal(`<div style="font-size:20px">🏆 Player ${winner.id} ${winner.emoji} Wins!</div><div style="margin-top:8px">Points: ${winner.score}</div>`, [{txt:'OK', cb:closeModal}]);
+  lg('Game ended. Winner: Player '+winner.id);
+}
+
+// check on each major step if someone reached last tile and is highest score
+function checkForWin(){
+  const atEnd = players.filter(p=>p.pos>=tileCount);
+  if(atEnd.length>0){
+    // winner = among those at end with highest score
+    const winner = atEnd.sort((a,b)=> b.score - a.score)[0];
+    finishGame(winner);
+    return true;
+  }
+  return false;
+}
+
+// ----- utility & init -----
+function closeAll(){ closeModal(); }
+function resetLog(){ logEl.innerHTML=''; }
+
+// initialize small UI actions
+document.addEventListener('keydown', (e)=>{
+  if(e.key.toLowerCase()==='r') document.getElementById('rollBtn').click();
+});
+
+lg('Ready. Configure players & press Start.');
+
+// make initial small board preview
+createBoardGrid(16);
+assignEvents(16);
+</script>
+</body>
+</html>

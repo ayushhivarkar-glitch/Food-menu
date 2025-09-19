@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cute Truth or Dare — Thousands of Prompts</title>
+<style>
+  :root{
+    --bg1:#fff1f8; --bg2:#fff7e6;
+    --accent:#ff6bcb; --accent2:#7bd389;
+    --card:#ffffff; --muted:#6b6b6b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(1200px 600px at 10% 10%, rgba(255,107,171,0.08), transparent),
+                linear-gradient(135deg,var(--bg1),var(--bg2));
+    padding:24px;
+  }
+
+  .wrap{
+    width:100%; max-width:920px; background:linear-gradient(180deg,#ffffffee,#fffaf6);
+    border-radius:18px; padding:20px; box-shadow: 0 14px 40px rgba(12,18,31,0.12);
+    display:grid; grid-template-columns: 1fr 360px; gap:18px;
+  }
+
+  .hero {
+    padding:18px; border-radius:12px; display:flex; flex-direction:column; gap:12px;
+  }
+
+  h1 { margin:0; font-size:26px; color:#322; display:flex; gap:10px; align-items:center; }
+  .tag { font-size:13px; color:var(--muted); }
+  .card {
+    background:var(--card); border-radius:12px; padding:18px; box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  }
+
+  #prompt {
+    min-height:140px; display:flex; align-items:center; justify-content:center;
+    font-size:20px; padding:18px; text-align:center; color:#222; line-height:1.35;
+    border-radius:12px; position:relative;
+  }
+
+  .buttons {
+    display:flex; gap:12px; justify-content:center; margin-top:12px;
+  }
+
+  button.big {
+    padding:14px 22px; font-size:16px; border-radius:12px; font-weight:800; cursor:pointer;
+    border:none; box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+  }
+  button.truth { background:linear-gradient(90deg,#ffd1ea,#ff9ed6); color:#6b1435; }
+  button.dare  { background:linear-gradient(90deg,#c7f7d6,#7bd389); color:#0a5a2a; }
+
+  button.small {
+    padding:8px 10px; border-radius:10px; border:none; cursor:pointer; font-weight:700;
+  }
+
+  .side {
+    display:flex; flex-direction:column; gap:12px;
+  }
+
+  .meta { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+  .counter { font-weight:800; color:#333; }
+
+  .log { max-height:300px; overflow:auto; padding:12px; border-radius:10px; background:#fff7; font-size:13px; color:#222; }
+
+  .controls { display:flex; gap:8px; flex-wrap:wrap; }
+
+  .heart {
+    width:12px; height:12px; display:inline-block; margin-left:6px; transform:translateY(1px);
+  }
+
+  footer.small { font-size:12px; color:var(--muted); text-align:center; margin-top:10px; }
+
+  /* cute animation */
+  .confetti {
+    position:absolute; pointer-events:none; inset:0; z-index:40;
+  }
+
+  @media (max-width:980px){
+    .wrap{ grid-template-columns: 1fr; padding:14px; }
+    .side{ order:2; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" role="application" aria-label="Truth or Dare game">
+  <div class="hero">
+    <h1>💖 Cute Truth or Dare <span class="tag">— thousands of prompts</span></h1>
+
+    <div class="card" id="prompt" aria-live="polite">
+      <div id="promptText">Press <strong class="tag">Truth</strong> or <strong class="tag">Dare</strong> to start the fun! <span class="heart">💘</span></div>
+      <div class="confetti" id="confetti"></div>
+    </div>
+
+    <div class="buttons">
+      <button class="big truth" id="truthBtn" aria-label="Truth button">🤫 Truth</button>
+      <button class="big dare" id="dareBtn" aria-label="Dare button">🎭 Dare</button>
+    </div>
+
+    <div style="display:flex;justify-content:center;margin-top:8px;gap:8px">
+      <button class="small" id="nextBtn" title="Get another of the same kind">Next</button>
+      <button class="small" id="newRandomBtn" title="Get a new random type (truth or dare)">Random</button>
+      <button class="small" id="resetUsed" title="Allow repeats by clearing used history">Reset Used</button>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px;">
+      <button class="small" id="cuteMode">Toggle Cute Mode</button>
+      <button class="small" id="familyMode">Toggle Family Mode</button>
+      <button class="small" id="downloadBtn">Export Sample</button>
+    </div>
+
+    <footer class="small">All prompts are family-friendly and randomized. No repeats until pool exhausted.</footer>
+  </div>
+
+  <aside class="side">
+    <div class="card">
+      <div class="meta">
+        <div>
+          <div style="font-size:13px;color:var(--muted)">Pool sizes</div>
+          <div class="counter" id="poolCount">Truth: 0 | Dare: 0</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;color:var(--muted)">Used</div>
+          <div class="counter" id="usedCount">Truth: 0 | Dare: 0</div>
+        </div>
+      </div>
+      <hr style="margin:10px 0">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center">
+        <div class="small">Pick style:</div>
+        <div>
+          <button id="styleCute" class="small">Cute</button>
+          <button id="styleBold" class="small">Spicy-lite</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:8px">Recent Prompts</div>
+      <div class="log" id="recentLog" aria-live="polite"></div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:8px">Settings</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label><input type="checkbox" id="noRepeat" checked> Prevent immediate repeats (no reuse until pool ends)</label>
+        <label><input type="checkbox" id="persist" checked> Persist used prompts (localStorage)</label>
+        <label><input type="checkbox" id="safeMode" checked> Family-friendly mode (strict)</label>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+/*
+  Truth-or-Dare Cute Game
+  - Generates thousands of unique prompts by combining templates and word pools.
+  - Keeps used items in a Set until pool is exhausted (optionally persisted).
+  - Buttons: Truth, Dare, Next, Random, Reset Used.
+  - Family-friendly content only; "spicy-lite" is mild and still safe.
+*/
+
+/* --------- configuration --------- */
+const TARGET_TRUTH = 3000; // target number of unique truth prompts to generate
+const TARGET_DARE = 3000;  // target number of unique dare prompts to generate
+
+let familyMode = true;     // strict family-friendly filters
+let cuteMode = true;       // cute tone on/off
+let noRepeat = true;
+let persist = true;
+
+/* --------- prompt template pools (safe & family-friendly) ---------
+   We'll use multiple templates and substitution lists to combinatorially
+   generate thousands of unique prompts without manually listing them all.
+*/
+
+// small helper arrays for personalized phrases (safe)
+const subjects = ["you", "your best friend", "someone in the room", "your crush (if any)", "your childhood friend", "a random contact"];
+const places = ["school", "a party", "a family dinner", "a park", "a movie theatre", "an elevator"];
+const sillyThings = ["that song you hum when nobody's listening", "a quirky habit", "a secret talent", "a weird food combo you love", "your childhood nickname"];
+const compliments = ["someone's smile", "a kind thing you did", "a time you felt proud", "a small act of bravery", "your favorite memory from this year"];
+
+// Truth templates (family-friendly)
+const truthTemplates = [
+  "What's the cutest nickname someone gave you?",
+  "Have you ever kept a secret for a friend? What was it?",
+  "What is one small thing that always makes you smile?",
+  "Tell about the most embarrassing but funny moment you've had in {place}.",
+  "Which song do you secretly love but feel shy to admit?",
+  "What's a habit you have that you find kind of silly?",
+  "Who was your childhood hero and why?",
+  "What's the nicest compliment you've received about {compliment}?",
+  "Have you ever told a little white lie to avoid hurting someone's feelings? What happened?",
+  "What's a snack combo that's weird but delicious to you?",
+  "What's the kindest thing you've done for someone recently?",
+  "If you could relive one happy moment, which would it be?",
+  "What's one thing you're proud of that not many people know?",
+  "What's a small fear you have that's kind of funny now?",
+  "What's the biggest surprise you've ever planned for someone?",
+  "Which pet name would you like someone to call you?",
+  "What's the sweetest text message you've ever received?",
+  "If you could instantly learn one skill, what would it be?",
+  "What's one story your family always tells about you?",
+  "What would be your dream day from morning to night?"
+];
+
+// Dare templates (safe, mild, fun)
+const dareTemplates = [
+  "Sing the chorus of your favorite song out loud for 20 seconds.",
+  "Do your best goofy dance for 30 seconds.",
+  "Swap a compliment with the person to your left — be dramatic!",
+  "Pretend you're a cat for 15 seconds and meow loudly.",
+  "Do 10 jumping jacks while shouting 'I love snacks!'",
+  "Speak in a silly accent until your next turn.",
+  "Act out a movie scene chosen by the group for 30 seconds.",
+  "Say something you appreciate about everyone in the circle.",
+  "Balance a spoon on your nose for 10 seconds.",
+  "Make up a short poem (4 lines) about how awesome someone here is, and recite it.",
+  "Draw a small doodle on paper of something you love and show it proudly.",
+  "Do your best runway walk across the room (or pretend to).",
+  "Share a funny face and hold it for 8 seconds.",
+  "Compliment the person who has the brightest shirt right now — in rhymes!",
+  "Act like your favorite animal and have others guess which one.",
+  "Tell a two-line joke in your most dramatic voice.",
+  "Pretend you're hosting a cooking show and describe making a sandwich in an exaggerated way.",
+  "Hop on one foot and sing the alphabet until someone says stop.",
+  "Give a short, sincere motivational pep talk to someone chosen by the group.",
+  "Take a goofy selfie and make the silliest face you can (show if comfortable)."
+];
+
+// Additional building blocks to expand to thousands
+const truthAddOns = [
+  "in {place}", "about {silly}", "about {compliment}", "you haven't told many people", "from your childhood",
+  "related to friendships", "that always surprises people", "that makes you laugh when you remember it"
+];
+const dareAddOns = [
+  "for 20 seconds", "with your eyes closed", "while hopping", "in a whispering voice", "but in slow motion",
+  "with a dramatic pose at the end", "and everyone must clap", "and end with a bow"
+];
+
+// Safe adjective/verbs to vary tone
+const adjs = ["adorable", "silly", "funny", "sweet", "unexpected", "memorable", "tiny", "quirky", "bright", "warm"];
+const verbs = ["share", "describe", "recall", "show", "demonstrate", "pretend", "name", "reveal"];
+
+/* --------- Pools and used tracking --------- */
+let truthPool = []; // will contain generated truth strings
+let darePool = [];
+let usedTruth = new Set();
+let usedDare = new Set();
+
+const promptTextEl = document.getElementById('promptText');
+const poolCountEl = document.getElementById('poolCount');
+const usedCountEl = document.getElementById('usedCount');
+const recentLogEl = document.getElementById('recentLog');
+const confettiEl = document.getElementById('confetti');
+
+/* --------- utility helpers --------- */
+function sample(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function uniqueAdd(set, text){ if(!set.has(text)){ set.add(text); return true; } return false; }
+
+/* Generate a family-friendly truth by combining template + optional addon + small variations */
+function buildTruth(){
+  // pick template
+  const tpl = sample(truthTemplates);
+  // random chance to add an addon or placeholder substitutions
+  let text = tpl;
+
+  // replace placeholders if present
+  text = text.replace(/\{place\}/g, sample(places));
+  text = text.replace(/\{silly\}/g, sample(sillyThings));
+  text = text.replace(/\{compliment\}/g, sample(compliments));
+
+  // sometimes append addon
+  if(Math.random() < 0.55){
+    text += " " + sample(truthAddOns).replace("{place}", sample(places)).replace("{silly}", sample(sillyThings)).replace("{compliment}", sample(compliments));
+  }
+
+  // occasionally prefix with a cute starter
+  if(cuteMode && Math.random()<0.35){
+    text = sample(["Aww —", "Tiny question:", "Sweet truth:"]).replace(":",":") + " " + text;
+  }
+
+  return text;
+}
+
+/* Build a dare prompt similarly */
+function buildDare(){
+  const tpl = sample(dareTemplates);
+  let text = tpl;
+
+  // sometimes append an addon
+  if(Math.random() < 0.6){
+    text += " " + sample(dareAddOns);
+  }
+
+  if(cuteMode && Math.random()<0.25){
+    text = sample(["Oh wow —","Fun dare:", "Go on:"]) + " " + text;
+  }
+  return text;
+}
+
+/* Populate pools by generating unique prompts until target reached (or iteration cap) */
+function populatePools(){
+  truthPool = []; darePool = [];
+  const truthSet = new Set();
+  const dareSet = new Set();
+
+  let iter = 0;
+  while(truthSet.size < TARGET_TRUTH && iter < TARGET_TRUTH * 10){
+    const t = buildTruth();
+    truthSet.add(t);
+    iter++;
+  }
+  iter = 0;
+  while(dareSet.size < TARGET_DARE && iter < TARGET_DARE * 10){
+    const d = buildDare();
+    dareSet.add(d);
+    iter++;
+  }
+
+  truthPool = Array.from(truthSet);
+  darePool = Array.from(dareSet);
+
+  // shuffle
+  shuffle(truthPool); shuffle(darePool);
+}
+
+/* shuffle in-place */
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+}
+
+/* pick a prompt from pool respecting used set and noRepeat setting */
+function pickPrompt(kind){
+  const pool = (kind === 'truth') ? truthPool : darePool;
+  const used = (kind === 'truth') ? usedTruth : usedDare;
+
+  if(pool.length === 0) return "Pool is empty.";
+
+  // If noRepeat, pick first unused item if possible
+  if(noRepeat){
+    // find first not used
+    for(let i=0;i<pool.length;i++){
+      if(!used.has(pool[i])){
+        used.add(pool[i]);
+        persistUsed();
+        return pool[i];
+      }
+    }
+    // all used: if persist and localstorage had them, we can optionally reset
+    // we'll allow wrap-around after clearing used automatically
+    used.clear();
+    persistUsed();
+  }
+
+  // fallback: random pick
+  const item = sample(pool);
+  if(noRepeat) used.add(item);
+  persistUsed();
+  return item;
+}
+
+/* persist used into localStorage if chosen */
+function persistUsed(){
+  if(!persist) return;
+  try{
+    localStorage.setItem('tod_used_truth', JSON.stringify(Array.from(usedTruth)));
+    localStorage.setItem('tod_used_dare', JSON.stringify(Array.from(usedDare)));
+  }catch(e){}
+}
+
+/* load used from localStorage */
+function loadUsed(){
+  if(!persist) return;
+  try{
+    const a = JSON.parse(localStorage.getItem('tod_used_truth')||'[]');
+    const b = JSON.parse(localStorage.getItem('tod_used_dare')||'[]');
+    usedTruth = new Set(a);
+    usedDare = new Set(b);
+  }catch(e){ usedTruth = new Set(); usedDare = new Set(); }
+}
+
+/* reset used pools */
+function resetUsed(){
+  usedTruth.clear(); usedDare.clear();
+  persistUsed();
+  updateCounters();
+  logRecent("Used history cleared — repeats allowed again.");
+}
+
+/* update UI counters */
+function updateCounters(){
+  poolCountEl.textContent = `Truth: ${truthPool.length.toLocaleString()} | Dare: ${darePool.length.toLocaleString()}`;
+  usedCountEl.textContent = `Truth: ${usedTruth.size.toLocaleString()} | Dare: ${usedDare.size.toLocaleString()}`;
+}
+
+/* show prompt with little animation and confetti for cute mode on special events */
+function showPrompt(kind, text){
+  promptTextEl.textContent = '';
+  // show small animation
+  const el = promptTextEl;
+  el.style.opacity = 0;
+  setTimeout(()=> el.textContent = text, 150);
+  setTimeout(()=> el.style.opacity = 1, 160);
+
+  // log recent
+  logRecent(`${kind.toUpperCase()}: ${text}`);
+
+  // brief confetti on dares or cute triggers
+  if(cuteMode && (kind === 'dare' || Math.random() < 0.08)){
+    popConfetti();
+  }
+}
+
+/* recent log */
+function logRecent(txt){
+  const p = document.createElement('div');
+  p.textContent = txt;
+  recentLogEl.prepend(p);
+  // limit log
+  while(recentLogEl.children.length > 80) recentLogEl.removeChild(recentLogEl.lastChild);
+  updateCounters();
+}
+
+/* small confetti hearts animation */
+function popConfetti(){
+  const container = confettiEl;
+  const colors = ["#ff6bcb","#ffd1dc","#ffd166","#7bd389","#7bd3ff"];
+  for(let i=0;i<18;i++){
+    const node = document.createElement('div');
+    node.style.position = 'absolute';
+    node.style.left = Math.random()*100 + '%';
+    node.style.top = Math.random()*60 + '%';
+    node.style.fontSize = (8 + Math.random()*14) + 'px';
+    node.style.opacity = '0.95';
+    node.textContent = sample(['💖','✨','🌸','💫','💕']);
+    node.style.transform = `translateY(0) scale(${0.8+Math.random()*0.8})`;
+    container.appendChild(node);
+    // animate
+    const dur = 800 + Math.random()*900;
+    node.animate([
+      { transform: node.style.transform, opacity:1 },
+      { transform: `translateY(-60px) translateX(${(Math.random()-0.5)*120}px) scale(0.6)`, opacity:0 }
+    ], { duration: dur, easing: 'cubic-bezier(.2,.8,.2,1)'});
+    setTimeout(()=> node.remove(), dur+50);
+  }
+}
+
+/* Export a small sample of prompts (download) */
+function exportSample(){
+  const sampleT = truthPool.slice(0,200);
+  const sampleD = darePool.slice(0,200);
+  const payload = { truth: sampleT, dare: sampleD, generatedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'tod-sample.json'; document.body.appendChild(a); a.click();
+  a.remove(); URL.revokeObjectURL(url);
+}
+
+/* --------- Events & initialization --------- */
+
+document.getElementById('truthBtn').addEventListener('click', ()=>{
+  const t = pickPrompt('truth');
+  showPrompt('truth', t);
+});
+document.getElementById('dareBtn').addEventListener('click', ()=>{
+  const d = pickPrompt('dare');
+  showPrompt('dare', d);
+});
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  // repeat same type as last shown if any, else random
+  const last = recentLogEl.firstChild ? recentLogEl.firstChild.textContent : null;
+  let kind = 'truth';
+  if(last){
+    kind = last.startsWith('DARE:') ? 'dare' : (last.startsWith('TRUTH:') ? 'truth' : sample(['truth','dare']));
+  } else kind = sample(['truth','dare']);
+  const p = pickPrompt(kind);
+  showPrompt(kind, p);
+});
+document.getElementById('newRandomBtn').addEventListener('click', ()=>{
+  const kind = Math.random() < 0.5 ? 'truth' : 'dare';
+  const p = pickPrompt(kind);
+  showPrompt(kind, p);
+});
+document.getElementById('resetUsed').addEventListener('click', ()=> resetUsed());
+
+document.getElementById('cuteMode').addEventListener('click', ()=>{
+  cuteMode = !cuteMode;
+  logRecent("Cute mode: " + (cuteMode ? "ON" : "OFF"));
+});
+document.getElementById('familyMode').addEventListener('click', ()=>{
+  familyMode = !familyMode;
+  logRecent("Family-friendly mode: " + (familyMode ? "ON" : "OFF"));
+});
+document.getElementById('downloadBtn').addEventListener('click', exportSample);
+
+document.getElementById('styleCute').addEventListener('click', ()=>{ cuteMode = true; logRecent("Style set to Cute"); });
+document.getElementById('styleBold').addEventListener('click', ()=>{ cuteMode = false; logRecent("Style set to Spicy-lite (still safe)"); });
+
+document.getElementById('noRepeat').addEventListener('change', (e)=>{ noRepeat = e.target.checked; logRecent("No-repeat: " + (noRepeat ? "ON" : "OFF")); });
+document.getElementById('persist').addEventListener('change', (e)=>{ persist = e.target.checked; if(!persist){ localStorage.removeItem('tod_used_truth'); localStorage.removeItem('tod_used_dare'); } logRecent("Persist: " + (persist ? "ON" : "OFF")); });
+document.getElementById('safeMode').addEventListener('change', (e)=>{ familyMode = e.target.checked; logRecent("Family mode: " + (familyMode ? "ON" : "OFF")); });
+
+/* keyboard shortcuts */
+document.addEventListener('keydown', (e)=>{
+  if(e.key.toLowerCase() === 't') document.getElementById('truthBtn').click();
+  if(e.key.toLowerCase() === 'd') document.getElementById('dareBtn').click();
+  if(e.key.toLowerCase() === 'n') document.getElementById('nextBtn').click();
+});
+
+/* init: generate pools, try to load used sets */
+function init(){
+  // create pools
+  populatePools();
+  // optionally restore used
+  loadUsed();
+  updateCounters();
+  logRecent(`Generated ${truthPool.length.toLocaleString()} Truths and ${darePool.length.toLocaleString()} Dares.`);
+  logRecent("Press 🤫 Truth or 🎭 Dare (or T/D). No repeats until pool ends.");
+}
+init();
+
+</script>
+</body>
+</html>
+

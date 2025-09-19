@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Banana Smoothie – Fresh & Irresistible</title>
+
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    :root {
+      --light-bg: #fff8ed;
+      --dark-bg: #1a1a1a;
+    }
+    body {
+      margin: 0;
+      background: var(--light-bg);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      transition: background 0.5s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .menu-card {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 900px;
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+      overflow: hidden;
+      transition: background 0.3s ease;
+    }
+    body.dark-mode .menu-card {
+      background: #2b2b2b;
+    }
+
+    .model-container {
+      flex: 1 1 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.4), transparent 70%);
+      padding: 20px;
+    }
+    model-viewer {
+      width: min(75%, 480px);
+      height: min(55vh, 280px);
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
+    }
+    model-viewer.loaded {
+      opacity: 1;
+    }
+
+    .details {
+      flex: 1 1 500px;
+      padding: 30px;
+      color: #333;
+    }
+    body.dark-mode .details {
+      color: #f5f5f5;
+    }
+    .details h2 {
+      margin-top: 0;
+      font-size: 2rem;
+      color: #f4b400;
+    }
+    .highlight {
+      background: rgba(244, 180, 0, 0.15);
+      padding: 8px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-style: italic;
+      font-size: 14px;
+    }
+    .badge {
+      display: inline-block;
+      background: #ffb300;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .reviews {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #777;
+    }
+
+    .back-btn, .toggle-btn {
+      position: fixed;
+      padding: 10px 18px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.3s;
+      z-index: 100;
+    }
+    .back-btn {
+      top: 20px;
+      left: 20px;
+      background: #f4c542;
+      color: black;
+    }
+    .back-btn:hover {
+      background: #e2b63f;
+      transform: scale(1.05);
+    }
+    .toggle-btn {
+      top: 20px;
+      right: 20px;
+      background: #555;
+      color: white;
+    }
+    .toggle-btn:hover {
+      background: #333;
+      transform: scale(1.05);
+    }
+
+    .instructions {
+      position: fixed;
+      bottom: 20px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      animation: fadeOut 4s forwards;
+      animation-delay: 3s;
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← Back</a>
+  <div class="toggle-btn" id="themeToggle">🌙 Dark</div>
+
+  <div class="menu-card">
+    <div class="model-container">
+      <model-viewer
+        src="Cheese_Crust_Pizza.glb"
+        alt="3D Banana Smoothie"
+        poster="poster.png"
+        camera-controls
+        auto-rotate
+        shadow-intensity="1"
+        shadow-softness="0.8"
+        exposure="1.4"
+        environment-image="neutral"
+        camera-orbit="0deg 70deg 3m"
+        field-of-view="35deg"
+        auto-rotate-delay="2000"
+        reveal="auto"
+        ar
+        ar-modes="webxr scene-viewer quick-look">
+      </model-viewer>
+    </div>
+<div class="details">
+  <span class="badge">🧀 Ultimate Cheese Lover</span>
+  <h2>Cheese Crust Pizza</h2>
+  <p>Golden, crispy crust filled with gooey melted cheese — topped with a rich tomato base, mozzarella, and fresh toppings.</p>
+  <div class="highlight">Cheese in every bite — from crust to center! 🍕</div>
+  <p><strong>Size:</strong> 12-inch · <strong>Price:</strong> ₹399</p>
+  <p><strong>Ingredients:</strong> Pizza Dough, Cheese-Filled Crust, Tomato Sauce, Mozzarella, Mixed Veggies or Meat</p>
+  <div class="reviews">⭐⭐⭐⭐⭐ “Cheese heaven from start to finish!” — Priya L.</div>
+</div>
+
+
+
+  <div class="instructions">💡 Drag to rotate · Scroll to zoom</div>
+
+  <script>
+    const viewer = document.querySelector("model-viewer");
+    viewer.addEventListener("load", () => {
+      viewer.classList.add("loaded");
+    });
+
+    const themeToggle = document.getElementById("themeToggle");
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      if (document.body.classList.contains("dark-mode")) {
+        document.body.style.background = "var(--dark-bg)";
+        themeToggle.textContent = "☀️ Light";
+      } else {
+        document.body.style.background = "var(--light-bg)";
+        themeToggle.textContent = "🌙 Dark";
+      }
+    });
+  </script>
+
+</body>
+</html>
